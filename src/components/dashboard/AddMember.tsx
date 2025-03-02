@@ -11,6 +11,7 @@ import useTeamStore from "@/store/teamStore";
 import { MemberType } from "@/types/teamTypes";
 import { displayRealTimeTime, getLocalWorkHours, getWorkStatus } from "@/utils/timeUtils";
 import { v4 as uuidv4 } from 'uuid';
+import { timeZones } from "@/data/timezones";
 
 const generateUUID = () => uuidv4();
 
@@ -28,13 +29,18 @@ const memberSchema = z.object({
     From: z.string().min(1, "Start time is required"),
     To: z.string().min(1, "End time is required"),
   }),
-    // Status: z.string(),
-    currentTime: z.string(),
+    Status: z.string().default('string'),
 });
+
 
 export default function AddMember() {
   const [open, setOpen] = useState(false);
    const {addMember} = useTeamStore()
+  //  const [timeZone, setTimeZone] = useState<string | null>();
+  //  useEffect(() => {
+  //   displayRealTimeTime(timeZone);
+  //  }, [timeZone]);
+  
   const {
     register,
     handleSubmit,
@@ -51,13 +57,14 @@ export default function AddMember() {
 
   const selectedContract = watch("contractType");
   const selectedTimezone = watch("timezone");
- console.log(selectedTimezone)
+
+  // setTimeZone(selectedTimezone);
   useEffect(() => {
     if (selectedTimezone) {
       const workingHours = watch("workingHours");
       const { startTime, endTime } = getLocalWorkHours(  workingHours.From,workingHours.To, selectedTimezone);
       setValue("LocalWorkHours", { From: startTime, To: endTime });
-      // setValue("currentTime", displayRealTimeTime(selectedTimezone));
+      setValue("Status", getWorkStatus((selectedTimezone), startTime, endTime));
     }
     
   }, [selectedTimezone,setValue,watch]);
@@ -70,7 +77,7 @@ export default function AddMember() {
     }
   }, [selectedContract, setValue]);
 
-  const onSubmit = (data:MemberType) => {
+  const onSubmit = (data:any) => {
     setOpen(false);
     addMember(data) // Close dialog
   };
@@ -100,9 +107,11 @@ export default function AddMember() {
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="America/New_York">New York (EST)</SelectItem>
-                <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                {timeZones.map((zone) => (
+                  <SelectItem key={zone} value={zone}>
+                    {zone}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.timezone && <p className="text-red-500 text-sm">{errors.timezone.message}</p>}

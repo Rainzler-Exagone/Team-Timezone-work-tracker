@@ -15,7 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Trash } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Loader, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -37,9 +37,10 @@ import { useEffect, useState } from "react"
 import { MemberType } from "@/types/teamTypes"
 import AddMember from "./AddMember"
 import useTeamStore from "@/store/teamStore"
-import { getWorkStatus } from "@/utils/timeUtils"
-// Define MemberType
-
+import {  getWorkStatus, updateTime } from "@/utils/timeUtils"
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css';
+import useTime from "@/hooks/useTime"
 
 
 
@@ -63,36 +64,20 @@ export const columns: ColumnDef<MemberType>[] = [
     cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "location",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Location <ArrowUpDown />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="">{row.getValue("location")}</div>,
-  },
-  {
     accessorKey: "timezone",
     header: "Time Zone",
     cell: ({ row }) => <div className="capitalize">{row.getValue("timezone")}</div>,
   },
   {
-    accessorKey: "status",
+    accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => (
-      <div className={`capitalize ${row.getValue("status") === "working" ? "text-green-500" : "text-red-500"}`}>
-        {row.getValue("status")}
+      <div className={`capitalize ${row.getValue("Status") === "Working" ? "text-green-500" : "text-red-500"}`}>
+        {row.getValue("Status")}
       </div>
     ),
   },
-  {
-    accessorKey: "currentTime",
-    header: "Current Time",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("currentTime")}</div>,
-  },
+  
   {
     accessorKey: "contractType",
     header: "Contract Type",
@@ -132,17 +117,50 @@ export default function MembersTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [members, setMembers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentTime, setCurrentTimes] = useState<string[]>([]);
+  const [status, setStatus] = useState<string[]>([]);
   // Sample data
+
   useEffect(() => {
     const storedMembers = localStorage.getItem("team-storage");
     const members = storedMembers ? JSON.parse(storedMembers) : [];
     setMembers(members.state.team);
+    
+
+  }, [localStorage.getItem("team-storage")]);
+
+
+  
+
+
+
+
+  useEffect(() => {
+    setIsLoading(true);
+    const intervalId = setInterval(() => {
+      const storedMembers = localStorage.getItem("team-storage");
+      const members = storedMembers ? JSON.parse(storedMembers) : [];      
+      setCurrentTimes(members.state.team.map(member => updateTime(member.timezone)));
+        }, 1000);
+     
+      console.log(currentTime);
+      
+    
+      setIsLoading(false);
+    
+        return () => clearInterval(intervalId);
   }, []);
 
-  console.log(members);
+  console.log(currentTime);
+  
 
-
+ 
   const { removeMember } = useTeamStore()
+
+  
+ 
+
   const table = useReactTable({
     data: members,
     columns,
@@ -166,10 +184,10 @@ export default function MembersTable() {
     <div className="w-auto">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter locations..."
-          value={(table.getColumn("location")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter timezones..."
+          value={(table.getColumn("timezone")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("location")?.setFilterValue(event.target.value)
+            table.getColumn("timezone")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -222,12 +240,16 @@ export default function MembersTable() {
 
                     </TableCell>
                   ))}
+                    <TableCell> {/* This is the cell containing the delete button */}
+                    <span>{currentTime[row.id] || <Loader/> }</span>
+                  </TableCell>
                   <TableCell> {/* This is the cell containing the delete button */}
                     <Button className="mt-2 mx-4" variant={"destructive"} onClick={() => removeMember(row.original.id)}>
                       Delete {/* This is the delete button */}
                         
                     </Button>
                   </TableCell>
+
                 </TableRow>
               ))
             ) : (

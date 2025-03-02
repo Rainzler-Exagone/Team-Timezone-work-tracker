@@ -1,5 +1,5 @@
 // src/utils/timeUtils.ts
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isBetween from "dayjs/plugin/isBetween";
@@ -91,31 +91,30 @@ console.log(getLocalWorkHours("09:00", "17:00", "Asia/Tokyo"));
 
 
 
+export const updateTime = (targetTimeZone:any) => {
+  const now = dayjs().tz(targetTimeZone); // Get current time in target timezone
+  const formattedTime = now.format('HH:mm:ss'); // Format as HH:mm:ss (or hh:mm:ss A for AM/PM)
 
+  return formattedTime;
+  
+};
 
 export const  displayRealTimeTime = (targetTimeZone:any) => {
   let intervalId: NodeJS.Timeout | undefined;
 
-  const updateTime = () => {
-    const now = dayjs().tz(targetTimeZone); // Get current time in target timezone
-    const formattedTime = now.format('HH:mm:ss'); // Format as HH:mm:ss (or hh:mm:ss A for AM/PM)
-
-    console.log(formattedTime);
-    
-  };
+ 
 
   if (intervalId) {
     clearInterval(intervalId);
   }
 
   // Initial display
-  updateTime();
+  updateTime(targetTimeZone);
 
   // Update every second
   intervalId = setInterval(updateTime, 1000);
 }
 
-// const now = dayjs().tz("America/New_York"); // Get current time in target timezone
-//     const formattedTime = now.format('HH:mm:ss');
-//     console.log(formattedTime);
-    
+
+
+

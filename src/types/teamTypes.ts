@@ -5,6 +5,7 @@ export interface MemberType {
     workingHours: string;
     currentTime: string;
     LocalWorkHours: string;
+    Status: string;
 }
 
 export interface TeamState {
