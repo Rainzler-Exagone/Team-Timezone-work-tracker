@@ -8,8 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import useTeamStore from "@/store/teamStore";
-import { MemberType } from "@/types/teamTypes";
-import { displayRealTimeTime, getLocalWorkHours, getWorkStatus } from "@/utils/timeUtils";
+import {  getLocalWorkHours, getWorkStatus } from "@/utils/timeUtils";
 import { v4 as uuidv4 } from 'uuid';
 import { timeZones } from "@/data/timezones";
 

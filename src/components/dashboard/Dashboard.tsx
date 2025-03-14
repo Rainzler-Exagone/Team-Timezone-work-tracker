@@ -15,7 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Loader, Trash } from "lucide-react"
+import { ChevronDown, Loader } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -34,13 +34,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useEffect, useState } from "react"
-import { MemberType } from "@/types/teamTypes"
+import { MemberType, workHours } from "@/types/teamTypes"
 import AddMember from "./AddMember"
 import useTeamStore from "@/store/teamStore"
-import {  getWorkStatus, updateTime } from "@/utils/timeUtils"
-import Skeleton from 'react-loading-skeleton'
+import {   updateTime } from "@/utils/timeUtils"
 import 'react-loading-skeleton/dist/skeleton.css';
-import useTime from "@/hooks/useTime"
 
 
 
@@ -49,7 +47,7 @@ export const columns: ColumnDef<MemberType>[] = [
   {
     id: "select",
 
-    cell: ({ row }) => (
+    cell: () => (
       <Avatar>
         <AvatarImage src={"https://github.com/shadcn.png"} alt="@shadcn" />
         <AvatarFallback>CN</AvatarFallback>
@@ -99,7 +97,7 @@ export const columns: ColumnDef<MemberType>[] = [
     accessorKey: "LocalWorkHours",
     header: "Local Working Hours",
     cell: ({ row }) => {
-      const LocalWorkHours = row.getValue("LocalWorkHours");
+      const LocalWorkHours:workHours = row.getValue("LocalWorkHours");
       return (
         <div className="capitalize">
           {LocalWorkHours ? `${LocalWorkHours.From!} - ${LocalWorkHours.To!}` : "Not yet specified"}
@@ -117,9 +115,7 @@ export default function MembersTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [members, setMembers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTimes] = useState<string[]>([]);
-  const [status, setStatus] = useState<string[]>([]);
   // Sample data
 
   useEffect(() => {
@@ -137,17 +133,15 @@ export default function MembersTable() {
 
 
   useEffect(() => {
-    setIsLoading(true);
     const intervalId = setInterval(() => {
       const storedMembers = localStorage.getItem("team-storage");
       const members = storedMembers ? JSON.parse(storedMembers) : [];      
-      setCurrentTimes(members.state.team.map(member => updateTime(member.timezone)));
+      setCurrentTimes(members.state.team.map((member:any) => updateTime(member.timezone)));
         }, 1000);
      
       console.log(currentTime);
       
     
-      setIsLoading(false);
     
         return () => clearInterval(intervalId);
   }, []);
@@ -241,7 +235,7 @@ export default function MembersTable() {
                     </TableCell>
                   ))}
                     <TableCell> {/* This is the cell containing the delete button */}
-                    <span>{currentTime[row.id] || <Loader/> }</span>
+                    <span>{currentTime[Number(row.id)] || <Loader/> }</span>
                   </TableCell>
                   <TableCell> {/* This is the cell containing the delete button */}
                     <Button className="mt-2 mx-4" variant={"destructive"} onClick={() => removeMember(row.original.id)}>

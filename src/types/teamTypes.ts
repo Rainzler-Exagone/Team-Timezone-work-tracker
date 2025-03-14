@@ -8,6 +8,11 @@ export interface MemberType {
     Status: string;
 }
 
+export interface workHours{
+    From: string;
+    To: string;
+}
+
 export interface TeamState {
     team: MemberType[];
     addMember: (member: MemberType) => void;
