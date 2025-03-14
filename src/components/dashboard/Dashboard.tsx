@@ -85,7 +85,7 @@ export const columns: ColumnDef<MemberType>[] = [
     accessorKey: "workingHours",
     header: "Working Hours",
     cell: ({ row }) => {
-      const workingHours = row.getValue("workingHours");
+      const workingHours:workHours = row.getValue("workingHours");
       return (
         <div className="capitalize">
           {workingHours ? `${workingHours.From!} - ${workingHours.To!}` : "N/A"}
