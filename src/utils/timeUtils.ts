@@ -1,4 +1,3 @@
-// src/utils/timeUtils.ts
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -79,7 +78,6 @@ export const getWorkStatus = (currentTime: string, startTime: string, endTime: s
 }
 
 
-console.log(getLocalWorkHours("09:00", "17:00", "Asia/Tokyo"));
 
 
 
@@ -100,7 +98,7 @@ export const updateTime = (targetTimeZone:any) => {
 };
 
 export const  displayRealTimeTime = (targetTimeZone:any) => {
-  let intervalId: NodeJS.Timeout | undefined;
+  let intervalId;
 
  
 
